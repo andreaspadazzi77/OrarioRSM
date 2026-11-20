@@ -84,6 +84,7 @@ private fun Schermata(archivio: Archivio) {
     var stato by remember { mutableStateOf(archivio.carica(venerdi)) }
     var sveglieNascoste by remember { mutableStateOf(setOf<String>()) }
     var info by remember { mutableStateOf(false) }
+    var chiediReset by remember { mutableStateOf(false) }
     var novita by remember { mutableStateOf(archivio.ultimaVersioneVista != BuildConfigVersion.NOME) }
     var testoPausa by remember { mutableStateOf(if (stato.pausaEstesaAttiva) stato.minutiPausaTotali.toString() else "") }
 
@@ -266,8 +267,24 @@ private fun Schermata(archivio: Archivio) {
             CardSveglia("Vuoi aggiungere una sveglia", " 10 min prima dell'uscita?",
                 { Sveglie.imposta(ctx, "Uscita tra 10 minuti", r.riferimentoUscita); svegliaUscita = r.riferimentoUscita; archivio.svegliaUscita = r.riferimentoUscita; sveglieNascoste += "uscita" },
                 { sveglieNascoste += "uscita" })
+        if (stato.ingressoReale != null)
+            OutlinedButton({ chiediReset = true }, Modifier.fillMaxWidth()) { Text("Azzera gli orari") }
         Spacer(Modifier.height(16.dp))
     }
+
+    if (chiediReset) AlertDialog({ chiediReset = false },
+        title = { Text("Azzerare gli orari?") },
+        text = { Text("Vengono cancellati ingresso, permesso, straordinario e pausa estesa, e le sveglie impostate dall'app. Potrai aggiungere di nuovo le sveglie.") },
+        confirmButton = { TextButton({
+            svegliaUscita?.let { Sveglie.annullaPerOrario(ctx, it) }
+            svegliaPausa?.let { Sveglie.annullaPerOrario(ctx, it) }
+            svegliaUscita = null; svegliaPausa = null
+            archivio.svegliaUscita = null; archivio.svegliaPausa = null
+            sveglieNascoste = emptySet(); testoPausa = ""
+            aggiorna(StatoGiorno(modalita = stato.modalita, spalmato = stato.spalmato, venerdi = venerdi))
+            chiediReset = false
+        }) { Text("Azzera") } },
+        dismissButton = { TextButton({ chiediReset = false }) { Text("Annulla") } })
 
     if (info) AlertDialog({ info = false }, confirmButton = { TextButton({ info = false }) { Text("OK") } },
         title = { Text("Orario RSM") },

@@ -28,7 +28,7 @@ object Sveglie {
     }
 
     /** Chiede all'Orologio di cancellare la sveglia impostata a quell'orario (10 minuti prima del riferimento). */
-    private fun annullaPerOrario(context: Context, riferimentoMin: Int) {
+    fun annullaPerOrario(context: Context, riferimentoMin: Int) {
         val t = Calcolo.norm(riferimentoMin - Regole.MINUTI_SVEGLIA_ANTICIPO)
         val i = Intent(AlarmClock.ACTION_DISMISS_ALARM)
             .putExtra(AlarmClock.EXTRA_ALARM_SEARCH_MODE, AlarmClock.ALARM_SEARCH_MODE_TIME)
