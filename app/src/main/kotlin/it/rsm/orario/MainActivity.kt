@@ -23,6 +23,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.platform.LocalContext
 import android.widget.Toast
 import androidx.compose.foundation.background
@@ -98,15 +100,15 @@ private fun Schermata(archivio: Archivio) {
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         // Intestazione
-        Box(Modifier.fillMaxWidth().height(100.dp)) {
+        Box(Modifier.fillMaxWidth().height(130.dp)) {
             Row(Modifier.padding(start = 8.dp, top = 6.dp), verticalAlignment = Alignment.CenterVertically) {
                 Icona(R.drawable.ic_calendario, 40)
                 Spacer(Modifier.width(6.dp))
                 Text(data, fontSize = 24.sp, fontWeight = FontWeight.Bold, color = GrigioData)
             }
             Text("Orario RSM", fontSize = 40.sp, fontWeight = FontWeight.Bold,
-                modifier = Modifier.align(Alignment.BottomStart).padding(start = 10.dp))
-            Icona(R.drawable.ic_menu, 32, Modifier.align(Alignment.BottomEnd).padding(end = 8.dp, bottom = 12.dp)
+                modifier = Modifier.align(Alignment.CenterStart).padding(start = 10.dp, top = 30.dp))
+            Icona(R.drawable.ic_menu, 32, Modifier.align(Alignment.CenterEnd).padding(end = 8.dp, top = 30.dp)
                 .clickable { info = true })
         }
 
@@ -119,7 +121,7 @@ private fun Schermata(archivio: Archivio) {
                         .border(1.dp, Bordo, RoundedCornerShape(12.dp))
                         .clickable { aggiorna(stato.copy(modalita = m)); scegliIngresso(m) },
                         contentAlignment = Alignment.Center) {
-                        Text(if (m == Modalita.PRESENZA) "Presenza" else "Smart Working", color = Color.Gray,
+                        Text(if (m == Modalita.PRESENZA) "Presenza" else "Smart Working", color = if (sel) Color(0xFF3F5EE8) else Color.Gray,
                             fontSize = if (sel) 20.sp else 15.sp, fontWeight = if (sel) FontWeight.Bold else FontWeight.Normal)
                     }
                 }
@@ -132,7 +134,7 @@ private fun Schermata(archivio: Archivio) {
                 Row(Modifier.fillMaxSize().padding(horizontal = 10.dp), verticalAlignment = Alignment.CenterVertically) {
                     Icona(R.drawable.ic_spalmato, 28)
                     Text("  Spalmato", fontSize = 20.sp, modifier = Modifier.weight(1f))
-                    Switch(stato.spalmato, { archivio.spalmato = it; aggiorna(stato.copy(spalmato = it)) })
+                    Interruttore(stato.spalmato) { archivio.spalmato = it; aggiorna(stato.copy(spalmato = it)) }
                 }
             }
 
@@ -146,10 +148,10 @@ private fun Schermata(archivio: Archivio) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text("15 min inclusi - estendibile fino a 60", fontSize = 16.sp, color = Color(0xFF888888),
                             modifier = Modifier.weight(1f).padding(start = 10.dp))
-                        Switch(stato.pausaEstesaAttiva, {
+                        Interruttore(stato.pausaEstesaAttiva) {
                             testoPausa = ""
                             aggiorna(stato.copy(pausaEstesaAttiva = it, minutiPausaTotali = Regole.PAUSA_MIN))
-                        })
+                        }
                     }
                 }
             }
@@ -179,7 +181,7 @@ private fun Schermata(archivio: Archivio) {
                 }
                 Box(Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) {
                     Text(r?.let { Calcolo.fmt(it.ingressoMostrato) } ?: "--:--", fontSize = 40.sp, fontWeight = FontWeight.Bold,
-                        color = if (r != null) Rosso else Color.Black)
+                        color = Color.Black)
                 }
             }
             Scheda(Modifier.weight(1f).fillMaxHeight(), colore = Color(0xFFE8F2FA), raggio = 15) {
@@ -223,7 +225,7 @@ private fun Schermata(archivio: Archivio) {
         // Uscita aggiornata
         r?.uscitaAggiornata?.let {
             Scheda(Modifier.height(80.dp)) {
-                Row(Modifier.fillMaxSize().padding(horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+                Row(Modifier.fillMaxSize().padding(horizontal = 6.dp), verticalAlignment = Alignment.CenterVertically) {
                     Text("Uscita Aggiornata", fontSize = 20.sp, modifier = Modifier.weight(1f))
                     Text(Calcolo.fmt(it), fontSize = 40.sp, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
                 }
@@ -251,6 +253,17 @@ private fun Schermata(archivio: Archivio) {
         title = { Text("Novità versione ${BuildConfigVersion.NOME}") },
         text = { Text("Versione nativa Android (Kotlin): stesse regole di calcolo, stato giornaliero salvato e sveglie tramite l'app Orologio.") })
 }
+
+@Composable
+private fun Interruttore(on: Boolean, onChange: (Boolean) -> Unit) =
+    Box(Modifier.width(48.dp).height(28.dp).clickable { onChange(!on) }, contentAlignment = Alignment.Center) {
+        Box(Modifier.width(38.dp).height(15.dp).clip(RoundedCornerShape(8.dp))
+            .background(if (on) Color(0xFF7DE05A) else Color(0xFF6B6B6B)))
+        Box(Modifier.align(if (on) Alignment.CenterEnd else Alignment.CenterStart).let { it }
+            .padding(horizontal = 0.dp).size(24.dp)
+            .shadow(3.dp, CircleShape).clip(CircleShape)
+            .background(if (on) Color(0xFFF7F7F7) else Color(0xFFCFCFCF)))
+    }
 
 @Composable
 private fun CampoOra(testo: String, onClick: () -> Unit) =
