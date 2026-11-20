@@ -11,6 +11,17 @@ import it.rsm.orario.core.Regole
 
 /** Imposta una sveglia nell'app Orologio, 10 minuti prima dell'orario dato. Non richiede permessi. */
 object Sveglie {
+    private val main = Handler(Looper.getMainLooper())
+
+    /** Dopo l'intervento dell'Orologio, riporta Orario RSM davanti. */
+    private fun riportaInPrimoPiano(context: Context, dopoMs: Long = 800) {
+        main.postDelayed({
+            val i = Intent(context, MainActivity::class.java)
+                .addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT or Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+            runCatching { context.startActivity(i) }
+        }, dopoMs)
+    }
+
     fun imposta(context: Context, messaggio: String, orarioMin: Int) {
         val t = Calcolo.norm(orarioMin - Regole.MINUTI_SVEGLIA_ANTICIPO)
         val i = Intent(AlarmClock.ACTION_SET_ALARM)
@@ -25,6 +36,7 @@ object Sveglie {
             if (esito.isSuccess) "Sveglia impostata alle ${Calcolo.fmt(t)}" else "Impossibile impostare la sveglia",
             Toast.LENGTH_LONG,
         ).show()
+        riportaInPrimoPiano(context)
     }
 
     /** Chiede all'Orologio di cancellare la sveglia impostata a quell'orario (10 minuti prima del riferimento). */
@@ -36,6 +48,12 @@ object Sveglie {
             .putExtra(AlarmClock.EXTRA_MINUTES, t % 60)
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         runCatching { context.startActivity(i) }
+        riportaInPrimoPiano(context)
+    }
+
+    /** Cancella più sveglie una dopo l'altra, aspettando che l'app sia tornata davanti prima di ogni richiesta. */
+    fun annullaTutte(context: Context, riferimenti: List<Int>) {
+        riferimenti.forEachIndexed { n, rif -> main.postDelayed({ annullaPerOrario(context, rif) }, n * 2000L) }
     }
 
     /**

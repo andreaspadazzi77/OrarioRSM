@@ -283,8 +283,7 @@ private fun Schermata(archivio: Archivio) {
         title = { Text("Azzerare gli orari?") },
         text = { Text("Vengono cancellati ingresso, permesso, straordinario e pausa estesa, e le sveglie impostate dall'app. Potrai aggiungere di nuovo le sveglie.") },
         confirmButton = { TextButton({
-            svegliaUscita?.let { Sveglie.annullaPerOrario(ctx, it) }
-            svegliaPausa?.let { Sveglie.annullaPerOrario(ctx, it) }
+            Sveglie.annullaTutte(ctx, listOfNotNull(svegliaUscita, svegliaPausa))
             svegliaUscita = null; svegliaPausa = null
             archivio.svegliaUscita = null; archivio.svegliaPausa = null
             sveglieNascoste = emptySet(); testoPausa = ""
