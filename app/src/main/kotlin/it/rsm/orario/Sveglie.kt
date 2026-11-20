@@ -3,6 +3,7 @@ package it.rsm.orario
 import android.content.Context
 import android.content.Intent
 import android.provider.AlarmClock
+import android.widget.Toast
 import it.rsm.orario.core.Calcolo
 import it.rsm.orario.core.Regole
 
@@ -16,6 +17,11 @@ object Sveglie {
             .putExtra(AlarmClock.EXTRA_MINUTES, t % 60)
             .putExtra(AlarmClock.EXTRA_SKIP_UI, true)
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        runCatching { context.startActivity(i) }
+        val esito = runCatching { context.startActivity(i) }
+        Toast.makeText(
+            context,
+            if (esito.isSuccess) "Sveglia impostata alle ${Calcolo.fmt(t)}" else "Impossibile impostare la sveglia",
+            Toast.LENGTH_LONG,
+        ).show()
     }
 }
