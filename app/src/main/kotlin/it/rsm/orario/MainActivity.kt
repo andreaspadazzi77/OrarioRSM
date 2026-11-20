@@ -294,7 +294,7 @@ private fun Schermata(archivio: Archivio) {
         dismissButton = { TextButton({ chiediReset = false }) { Text("Annulla") } })
 
     when (dialogo) {
-        "release" -> Popup("Release", "Versione: 5\nRelease: 5\nFase: Beta\n\nCredits to Andrea Spadazzi") { dialogo = null }
+        "release" -> Popup("Release", "Versione: 6\nRelease: 0\nFase: Test\n\nCredits to Andrea Spadazzi") { dialogo = null }
         "note" -> Popup("Note di rilascio", Testi.NOTE) { dialogo = null }
         "guida" -> Popup("Guida per l'utente", Testi.GUIDA) { dialogo = null }
     }
@@ -344,4 +344,4 @@ private fun CardSveglia(riga1: String, riga2: String, ok: () -> Unit, no: () -> 
         }
     }
 
-object BuildConfigVersion { const val NOME = "5.5" }
+object BuildConfigVersion { const val NOME = "6.0" }

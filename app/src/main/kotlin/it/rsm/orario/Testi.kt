@@ -1,7 +1,7 @@
 package it.rsm.orario
 
 object Testi {
-    val NOTE = """Versione 5.5 Beta
+    val NOTE = """Versione 6.0 Test
 
 Novità
 • Prima versione nativa per Android: stesse regole di calcolo dell'app precedente.
