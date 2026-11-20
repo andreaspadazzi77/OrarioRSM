@@ -30,18 +30,18 @@ class CalcoloTest {
     }
 
     @Test fun venerdi_0743_esce_1255() {
-        val r = Calcolo.calcola(base("07:43") { copy(venerdi = true) })!!
+        val r = Calcolo.calcola(base("07:43") { copy(venerdi = true, spalmato = true) })!!
         assertEquals("12:55", Calcolo.fmt(r.uscita))
         assertEquals("12:55", Calcolo.fmt(r.timbraturaPausaVenerdi!!))
     }
 
     @Test fun venerdi_straordinario_2h30_aggiunge_15_minuti() {
-        val r = Calcolo.calcola(base("07:43") { copy(venerdi = true, straordinarioMin = 150) })!!
+        val r = Calcolo.calcola(base("07:43") { copy(venerdi = true, spalmato = true, straordinarioMin = 150) })!!
         assertEquals("15:40", Calcolo.fmt(r.uscitaAggiornata!!))   // 12:55 + 2:30 + 0:15
     }
 
     @Test fun venerdi_straordinario_sotto_1h_non_aggiunge() {
-        val r = Calcolo.calcola(base("07:43") { copy(venerdi = true, straordinarioMin = 45) })!!
+        val r = Calcolo.calcola(base("07:43") { copy(venerdi = true, spalmato = true, straordinarioMin = 45) })!!
         assertEquals("13:40", Calcolo.fmt(r.uscitaAggiornata!!))
     }
 
@@ -65,5 +65,12 @@ class CalcoloTest {
     @Test fun sveglia_solo_se_futura() {
         assertTrue(Calcolo.svegliaProponibile(h("16:42"), h("12:00")))
         assertFalse(Calcolo.svegliaProponibile(h("16:42"), h("17:00")))
+    }
+}
+
+class CalcoloVenerdiNonSpalmatoTest {
+    @Test fun venerdi_0743_senza_spalmato_ingresso_alle_0800() {
+        val r = Calcolo.calcola(StatoGiorno(ingressoReale = Calcolo.parse("07:43")!!, venerdi = true))!!
+        assertEquals("13:12", Calcolo.fmt(r.uscita))
     }
 }
