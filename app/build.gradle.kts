@@ -5,11 +5,11 @@ plugins {
 
 android {
     namespace = "it.rsm.orario"
-    compileSdk = 35
+    compileSdk = 36
     defaultConfig {
         applicationId = "it.rsm.orario"
         minSdk = 26
-        targetSdk = 35
+        targetSdk = 36
         versionCode = (System.getenv("GITHUB_RUN_NUMBER")?.toIntOrNull() ?: 0) + 100
         versionName = "6.0"
     }
