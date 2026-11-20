@@ -10,10 +10,16 @@ android {
         applicationId = "it.rsm.orario"
         minSdk = 26
         targetSdk = 35
-        versionCode = 55
+        versionCode = (System.getenv("GITHUB_RUN_NUMBER")?.toIntOrNull() ?: 0) + 100
         versionName = "5.5"
     }
     signingConfigs {
+        getByName("debug") {
+            storeFile = file("debug.jks")
+            storePassword = "android"
+            keyAlias = "debug"
+            keyPassword = "android"
+        }
         create("upload") {
             val ks = System.getenv("KEYSTORE_FILE")
             if (ks != null) {
