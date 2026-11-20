@@ -83,7 +83,8 @@ private fun Schermata(archivio: Archivio) {
     val venerdi = oggi.dayOfWeek == DayOfWeek.FRIDAY
     var stato by remember { mutableStateOf(archivio.carica(venerdi)) }
     var sveglieNascoste by remember { mutableStateOf(setOf<String>()) }
-    var info by remember { mutableStateOf(false) }
+    var menu by remember { mutableStateOf(false) }
+    var dialogo by remember { mutableStateOf<String?>(null) }
     var chiediReset by remember { mutableStateOf(false) }
     var novita by remember { mutableStateOf(archivio.ultimaVersioneVista != BuildConfigVersion.NOME) }
     var testoPausa by remember { mutableStateOf(if (stato.pausaEstesaAttiva) stato.minutiPausaTotali.toString() else "") }
@@ -132,8 +133,14 @@ private fun Schermata(archivio: Archivio) {
             }
             Text("Orario RSM", fontSize = 40.sp, fontWeight = FontWeight.Bold,
                 modifier = Modifier.align(Alignment.CenterStart).padding(start = 10.dp, top = 30.dp))
-            Icona(R.drawable.ic_menu, 32, Modifier.align(Alignment.CenterEnd).padding(end = 8.dp, top = 30.dp)
-                .clickable { info = true })
+            Box(Modifier.align(Alignment.CenterEnd).padding(end = 8.dp, top = 30.dp)) {
+                Icona(R.drawable.ic_menu, 32, Modifier.clickable { menu = true })
+                DropdownMenu(menu, { menu = false }) {
+                    DropdownMenuItem({ Text("Release") }, { menu = false; dialogo = "release" })
+                    DropdownMenuItem({ Text("Note di rilascio") }, { menu = false; dialogo = "note" })
+                    DropdownMenuItem({ Text("Guida per l'utente") }, { menu = false; dialogo = "guida" })
+                }
+            }
         }
 
         // Presenza / Smart Working
@@ -286,12 +293,14 @@ private fun Schermata(archivio: Archivio) {
         }) { Text("Azzera") } },
         dismissButton = { TextButton({ chiediReset = false }) { Text("Annulla") } })
 
-    if (info) AlertDialog({ info = false }, confirmButton = { TextButton({ info = false }) { Text("OK") } },
-        title = { Text("Orario RSM") },
-        text = { Text("Versione: 5\nRelease: 5\nFase: Beta\nCredits to Andrea Spadazzi") })
+    when (dialogo) {
+        "release" -> Popup("Release", "Versione: 5\nRelease: 5\nFase: Beta\n\nCredits to Andrea Spadazzi") { dialogo = null }
+        "note" -> Popup("Note di rilascio", Testi.NOTE) { dialogo = null }
+        "guida" -> Popup("Guida per l'utente", Testi.GUIDA) { dialogo = null }
+    }
     if (novita) AlertDialog({ }, confirmButton = { TextButton({ archivio.ultimaVersioneVista = BuildConfigVersion.NOME; novita = false }) { Text("OK") } },
         title = { Text("Novità versione ${BuildConfigVersion.NOME}") },
-        text = { Text("Versione nativa Android (Kotlin): stesse regole di calcolo, stato giornaliero salvato e sveglie tramite l'app Orologio.") })
+        text = { Text(Testi.NOTE, Modifier.verticalScroll(rememberScrollState())) })
 }
 
 @Composable
@@ -304,6 +313,12 @@ private fun Interruttore(on: Boolean, onChange: (Boolean) -> Unit) =
             .shadow(3.dp, CircleShape).clip(CircleShape)
             .background(if (on) Color(0xFFF7F7F7) else Color(0xFFCFCFCF)))
     }
+
+@Composable
+private fun Popup(titolo: String, testo: String, chiudi: () -> Unit) =
+    AlertDialog(chiudi, title = { Text(titolo) },
+        text = { Text(testo, Modifier.verticalScroll(rememberScrollState())) },
+        confirmButton = { TextButton(chiudi) { Text("OK") } })
 
 @Composable
 private fun CampoOra(testo: String, onClick: () -> Unit) =
