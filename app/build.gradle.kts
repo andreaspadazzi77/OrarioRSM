@@ -10,7 +10,7 @@ android {
         applicationId = "it.rsm.orario"
         minSdk = 26
         targetSdk = 36
-        versionCode = (System.getenv("GITHUB_RUN_NUMBER")?.toIntOrNull() ?: 0) + 100
+        versionCode = (System.getenv("GITHUB_RUN_NUMBER")?.toIntOrNull() ?: 0) + 100000
         versionName = "6.0"
     }
     signingConfigs {
