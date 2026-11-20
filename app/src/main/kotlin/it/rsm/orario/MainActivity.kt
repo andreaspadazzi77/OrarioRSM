@@ -87,12 +87,35 @@ private fun Schermata(archivio: Archivio) {
     var novita by remember { mutableStateOf(archivio.ultimaVersioneVista != BuildConfigVersion.NOME) }
     var testoPausa by remember { mutableStateOf(if (stato.pausaEstesaAttiva) stato.minutiPausaTotali.toString() else "") }
 
+    var svegliaUscita by remember { mutableStateOf(archivio.svegliaUscita) }
+    var svegliaPausa by remember { mutableStateOf(archivio.svegliaPausa) }
+
     fun aggiorna(n: StatoGiorno) { stato = n; archivio.salva(n) }
     fun scegliIngresso(m: Modalita) = scegliOra(ctx, stato.ingressoReale ?: adesso()) { aggiorna(stato.copy(modalita = m, ingressoReale = it)) }
 
     val r = Calcolo.calcola(stato)
     val presenza = stato.modalita == Modalita.PRESENZA
     val data = oggi.format(DateTimeFormatter.ofPattern("EEEE, dd/MM/yyyy", Locale.ITALY))
+
+    // Se l'orario cambia dopo aver aggiunto una sveglia, la sveglia viene aggiornata da sola.
+    val rifUscita = r?.riferimentoUscita
+    val rifPausa = r?.timbraturaPausaVenerdi
+    LaunchedEffect(rifUscita) {
+        val vecchia = svegliaUscita
+        if (vecchia != null && rifUscita != vecchia) {
+            val nuova = rifUscita?.takeIf { Calcolo.svegliaProponibile(it, adesso()) }
+            Sveglie.aggiorna(ctx, "Uscita tra 10 minuti", nuova)
+            svegliaUscita = nuova; archivio.svegliaUscita = nuova
+        }
+    }
+    LaunchedEffect(rifPausa) {
+        val vecchia = svegliaPausa
+        if (vecchia != null && rifPausa != vecchia) {
+            val nuova = rifPausa?.takeIf { Calcolo.svegliaProponibile(it, adesso()) }
+            Sveglie.aggiorna(ctx, "Pausa pranzo tra 10 minuti", nuova)
+            svegliaPausa = nuova; archivio.svegliaPausa = nuova
+        }
+    }
 
     Column(
         Modifier.fillMaxSize().background(Sfondo).statusBarsPadding().navigationBarsPadding()
@@ -234,14 +257,14 @@ private fun Schermata(archivio: Archivio) {
 
         // Sveglie
         r?.timbraturaPausaVenerdi?.let { p ->
-            if (Calcolo.svegliaProponibile(p, adesso()) && "pausa" !in sveglieNascoste)
+            if (svegliaPausa == null && Calcolo.svegliaProponibile(p, adesso()) && "pausa" !in sveglieNascoste)
                 CardSveglia("Vuoi aggiungere una sveglia", " 10 min prima del pranzo?",
-                    { Sveglie.imposta(ctx, "Pausa pranzo tra 10 minuti", p); sveglieNascoste += "pausa" },
+                    { Sveglie.imposta(ctx, "Pausa pranzo tra 10 minuti", p); svegliaPausa = p; archivio.svegliaPausa = p; sveglieNascoste += "pausa" },
                     { sveglieNascoste += "pausa" })
         }
-        if (r != null && Calcolo.svegliaProponibile(r.riferimentoUscita, adesso()) && "uscita" !in sveglieNascoste)
+        if (r != null && svegliaUscita == null && Calcolo.svegliaProponibile(r.riferimentoUscita, adesso()) && "uscita" !in sveglieNascoste)
             CardSveglia("Vuoi aggiungere una sveglia", " 10 min prima dell'uscita?",
-                { Sveglie.imposta(ctx, "Uscita tra 10 minuti", r.riferimentoUscita); sveglieNascoste += "uscita" },
+                { Sveglie.imposta(ctx, "Uscita tra 10 minuti", r.riferimentoUscita); svegliaUscita = r.riferimentoUscita; archivio.svegliaUscita = r.riferimentoUscita; sveglieNascoste += "uscita" },
                 { sveglieNascoste += "uscita" })
         Spacer(Modifier.height(16.dp))
     }

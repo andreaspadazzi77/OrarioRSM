@@ -20,6 +20,20 @@ class Archivio(context: Context) {
         get() = p.getString("UltimaVersioneVista", "") ?: ""
         set(v) = p.edit().putString("UltimaVersioneVista", v).apply()
 
+    /** Orari (minuti) delle sveglie create oggi dall'app: servono per aggiornarle se cambiano permesso/straordinario. */
+    private fun leggiSveglia(chiave: String): Int? =
+        if (p.getString("DataSveglie", "") == oggi()) p.getInt(chiave, -1).takeIf { it >= 0 } else null
+    private fun scriviSveglia(chiave: String, v: Int?) = p.edit()
+        .putString("DataSveglie", oggi()).putInt(chiave, v ?: -1).apply()
+
+    var svegliaUscita: Int?
+        get() = leggiSveglia("SvegliaUscita")
+        set(v) = scriviSveglia("SvegliaUscita", v)
+
+    var svegliaPausa: Int?
+        get() = leggiSveglia("SvegliaPausa")
+        set(v) = scriviSveglia("SvegliaPausa", v)
+
     fun salva(s: StatoGiorno) = p.edit()
         .putString("DataSalvataggio", oggi())
         .putInt("IngressoReale", s.ingressoReale ?: -1)
