@@ -14,12 +14,18 @@ App Android nativa (Kotlin + Jetpack Compose) che calcola l'orario di uscita a p
 - `core/` — logica di calcolo in Kotlin puro, con test unitari (`gradle :core:test`).
 - `app/` — interfaccia Android (Compose), archivio (SharedPreferences) e sveglie (`AlarmClock.ACTION_SET_ALARM`).
 
-## Build
-Apri la cartella con Android Studio (Koala o successivo) e lancia *Run*, oppure:
-```
-gradle :app:assembleDebug
-```
-Servono JDK 17 e Android SDK 34. L'APK si trova in `app/build/outputs/apk/debug/`.
+## Build (senza Android Studio)
+La compilazione avviene su GitHub Actions (`.github/workflows/build.yml`), a ogni push su `main` o da *Actions → Build → Run workflow*:
+- esegue i test della logica;
+- produce l'**APK di prova** (artifact `OrarioRSM-apk-prova`) da installare sul telefono;
+- se sono presenti i secrets di firma, produce l'**AAB firmato** (artifact `OrarioRSM-aab-play`) da caricare su Google Play Console.
+
+### Chiave di firma per Google Play
+1. *Actions → Genera chiave di firma → Run workflow*; scarica l'artifact `chiave-di-firma-CONSERVA-E-ELIMINA` (dura 1 giorno) e conservalo in un posto sicuro: contiene `upload.jks` e le password.
+2. In *Settings → Secrets and variables → Actions* crea i secrets `KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, `KEY_PASSWORD` con i valori di `secrets.txt`.
+3. Rilancia *Build*: compare l'AAB firmato.
+
+In alternativa, con Android Studio: `gradle :app:assembleDebug` o *Run*.
 
 ## Differenze rispetto alla versione App Inventor
 - Il venerdì con ingresso anticipato in modalità spalmata usa sempre le durate del venerdì (nell'originale usava per errore quelle di un giorno normale).

@@ -1,0 +1,25 @@
+name: Genera chiave di firma (una sola volta)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  chiave:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Genera keystore
+        run: |
+          PW=$(openssl rand -hex 12)
+          keytool -genkeypair -v -keystore upload.jks -alias upload -keyalg RSA -keysize 2048 -validity 10000 \
+            -storepass "$PW" -keypass "$PW" -dname "CN=Orario RSM, O=Personale, C=IT"
+          {
+            echo "KEYSTORE_PASSWORD=$PW"; echo "KEY_PASSWORD=$PW"; echo "KEY_ALIAS=upload"
+            echo "KEYSTORE_BASE64:"; base64 -w0 upload.jks; echo
+          } > secrets.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: chiave-di-firma-CONSERVA-E-ELIMINA
+          path: |
+            upload.jks
+            secrets.txt
+          retention-days: 1

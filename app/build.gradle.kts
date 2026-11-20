@@ -5,16 +5,30 @@ plugins {
 
 android {
     namespace = "it.rsm.orario"
-    compileSdk = 34
+    compileSdk = 35
     defaultConfig {
         applicationId = "it.rsm.orario"
         minSdk = 26
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 55
         versionName = "5.5"
     }
+    signingConfigs {
+        create("upload") {
+            val ks = System.getenv("KEYSTORE_FILE")
+            if (ks != null) {
+                storeFile = file(ks)
+                storePassword = System.getenv("KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("KEY_ALIAS")
+                keyPassword = System.getenv("KEY_PASSWORD")
+            }
+        }
+    }
     buildTypes {
-        release { isMinifyEnabled = false }
+        release {
+            isMinifyEnabled = false
+            if (System.getenv("KEYSTORE_FILE") != null) signingConfig = signingConfigs.getByName("upload")
+        }
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
