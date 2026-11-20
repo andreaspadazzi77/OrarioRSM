@@ -33,7 +33,7 @@ VENERDÌ
 Il venerdì la giornata dura 5 ore e 12 minuti, senza pausa pranzo.
 
 SVEGLIE
-L'app propone una sveglia 10 minuti prima dell'uscita (e il venerdì anche prima della pausa). Tocca il segno di spunta per aggiungerla all'app Orologio. Se poi cambi gli orari, la sveglia si aggiorna da sola.
+L'app propone una sveglia 10 minuti prima dell'uscita. Il venerdì, se inserisci permesso o straordinario, propone anche quella prima della pausa pranzo; senza permesso né straordinario la pausa coincide con l'uscita e basta la sveglia di uscita. Tocca il segno di spunta per aggiungerla all'app Orologio. Se poi cambi gli orari, la sveglia si aggiorna da sola.
 
 AZZERARE
 Il pulsante "Azzera gli orari" in fondo cancella ingresso, permesso, straordinario, pausa estesa e le sveglie create dall'app.

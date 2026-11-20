@@ -99,6 +99,9 @@ private fun Schermata(archivio: Archivio) {
     val presenza = stato.modalita == Modalita.PRESENZA
     val data = oggi.format(DateTimeFormatter.ofPattern("EEEE, dd/MM/yyyy", Locale.ITALY))
 
+    // Il venerdì, senza permesso né straordinario, la pausa coincide con l'uscita: basta la sveglia di uscita.
+    val mostraSvegliaPausa = venerdi && (stato.permessoMin > 0 || stato.straordinarioMin > 0)
+
     // Se l'orario cambia dopo aver aggiunto una sveglia, la sveglia viene aggiornata da sola.
     val rifUscita = r?.riferimentoUscita
     val rifPausa = r?.timbraturaPausaVenerdi
@@ -265,7 +268,7 @@ private fun Schermata(archivio: Archivio) {
 
         // Sveglie
         r?.timbraturaPausaVenerdi?.let { p ->
-            if (svegliaPausa == null && Calcolo.svegliaProponibile(p, adesso()) && "pausa" !in sveglieNascoste)
+            if (mostraSvegliaPausa && svegliaPausa == null && Calcolo.svegliaProponibile(p, adesso()) && "pausa" !in sveglieNascoste)
                 CardSveglia("Vuoi aggiungere una sveglia", " 10 min prima del pranzo?",
                     { Sveglie.imposta(ctx, "Pausa pranzo tra 10 minuti", p); svegliaPausa = p; archivio.svegliaPausa = p; sveglieNascoste += "pausa" },
                     { sveglieNascoste += "pausa" })
