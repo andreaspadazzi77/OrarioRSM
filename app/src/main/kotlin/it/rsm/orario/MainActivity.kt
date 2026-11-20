@@ -104,7 +104,7 @@ private fun Schermata(archivio: Archivio) {
         val vecchia = svegliaUscita
         if (vecchia != null && rifUscita != vecchia) {
             val nuova = rifUscita?.takeIf { Calcolo.svegliaProponibile(it, adesso()) }
-            Sveglie.aggiorna(ctx, "Uscita tra 10 minuti", nuova)
+            Sveglie.aggiorna(ctx, "Uscita tra 10 minuti", vecchia, nuova)
             svegliaUscita = nuova; archivio.svegliaUscita = nuova
         }
     }
@@ -112,7 +112,7 @@ private fun Schermata(archivio: Archivio) {
         val vecchia = svegliaPausa
         if (vecchia != null && rifPausa != vecchia) {
             val nuova = rifPausa?.takeIf { Calcolo.svegliaProponibile(it, adesso()) }
-            Sveglie.aggiorna(ctx, "Pausa pranzo tra 10 minuti", nuova)
+            Sveglie.aggiorna(ctx, "Pausa pranzo tra 10 minuti", vecchia, nuova)
             svegliaPausa = nuova; archivio.svegliaPausa = nuova
         }
     }

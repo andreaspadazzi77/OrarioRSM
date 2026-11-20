@@ -27,20 +27,24 @@ object Sveglie {
         ).show()
     }
 
-    /** Chiede all'Orologio di cancellare la sveglia con questa etichetta. */
-    fun annulla(context: Context, messaggio: String) {
+    /** Chiede all'Orologio di cancellare la sveglia impostata a quell'orario (10 minuti prima del riferimento). */
+    private fun annullaPerOrario(context: Context, riferimentoMin: Int) {
+        val t = Calcolo.norm(riferimentoMin - Regole.MINUTI_SVEGLIA_ANTICIPO)
         val i = Intent(AlarmClock.ACTION_DISMISS_ALARM)
-            .putExtra(AlarmClock.EXTRA_ALARM_SEARCH_MODE, AlarmClock.ALARM_SEARCH_MODE_LABEL)
-            .putExtra(AlarmClock.EXTRA_MESSAGE, messaggio)
+            .putExtra(AlarmClock.EXTRA_ALARM_SEARCH_MODE, AlarmClock.ALARM_SEARCH_MODE_TIME)
+            .putExtra(AlarmClock.EXTRA_HOUR, t / 60)
+            .putExtra(AlarmClock.EXTRA_MINUTES, t % 60)
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         runCatching { context.startActivity(i) }
     }
 
-    /** Cancella la vecchia sveglia e, se l'orario nuovo è ancora futuro, ne crea una nuova. */
-    fun aggiorna(context: Context, messaggio: String, nuovoOrarioMin: Int?) {
-        annulla(context, messaggio)
-        if (nuovoOrarioMin != null)
-            Handler(Looper.getMainLooper()).postDelayed({ imposta(context, messaggio, nuovoOrarioMin) }, 1500)
+    /**
+     * Sposta la sveglia dal vecchio al nuovo orario. Prima crea la nuova (mentre l'app è ancora in
+     * primo piano, altrimenti Android blocca l'avvio) e solo dopo cancella la vecchia.
+     */
+    fun aggiorna(context: Context, messaggio: String, vecchioRifMin: Int, nuovoRifMin: Int?) {
+        if (nuovoRifMin != null) imposta(context, messaggio, nuovoRifMin)
         else Toast.makeText(context, "Sveglia rimossa", Toast.LENGTH_SHORT).show()
+        Handler(Looper.getMainLooper()).postDelayed({ annullaPerOrario(context, vecchioRifMin) }, 1000)
     }
 }
